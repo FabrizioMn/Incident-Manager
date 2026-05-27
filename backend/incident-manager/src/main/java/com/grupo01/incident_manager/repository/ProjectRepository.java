@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import com.grupo01.incident_manager.model.Project;
 
 @Repository
-public interface ProjectRepository extends JpaRepository<Long, Project> {
+public interface ProjectRepository extends JpaRepository<Project, Long> {
     Optional<Project> findByKey(String key);
 
     boolean existsByKey(String key);

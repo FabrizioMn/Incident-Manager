@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import com.grupo01.incident_manager.model.Issue;
 
 @Repository
-public interface IssueRepository extends JpaRepository<Long, Issue> {
+public interface IssueRepository extends JpaRepository<Issue, Long> {
 
     // Listar tickets de un proyecto especifico agrupadas por su estado
     List<Issue> findByProject_IdProjectAndStatus(Long idProject, String status);

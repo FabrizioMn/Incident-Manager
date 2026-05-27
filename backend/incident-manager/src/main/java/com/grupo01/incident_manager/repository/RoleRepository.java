@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.grupo01.incident_manager.model.Role;
 
 @Repository
-public interface RoleRepository extends JpaRepository<Long, Role> {
+public interface RoleRepository extends JpaRepository<Role, Long> {
 
 }

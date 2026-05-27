@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.grupo01.incident_manager.model.IssueScheme;
 
 @Repository
-public interface IssueSchemeRepository extends JpaRepository<Long, IssueScheme> {
+public interface IssueSchemeRepository extends JpaRepository<IssueScheme, Long> {
 
 }

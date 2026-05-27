@@ -6,9 +6,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.grupo01.incident_manager.model.MemberProject;
+import com.grupo01.incident_manager.model.MemberProjectId;
 
 @Repository
-public interface MemberProjectRepository extends JpaRepository<Long, MemberProject> {
+public interface MemberProjectRepository extends JpaRepository<MemberProject, MemberProjectId> {
 
     // Para que un usuario pueda ver en que proyectos esta activo
     List<MemberProject> findById_IdUser(Long idUser);

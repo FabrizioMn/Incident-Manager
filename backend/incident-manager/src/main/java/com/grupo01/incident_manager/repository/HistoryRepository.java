@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import com.grupo01.incident_manager.model.History;
 
 @Repository
-public interface HistoryRepository extends JpaRepository<Long, History> {
+public interface HistoryRepository extends JpaRepository<History, Long> {
 
     // Para ver los cambios de un ticker en especifico, ordenado por fecha
     List<History> findByIssue_IdIssueOrderByChangedAtDesc(Long idIssue);
