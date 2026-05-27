@@ -12,13 +12,13 @@ import com.grupo01.incident_manager.model.Issue;
 public interface IssueRepository extends JpaRepository<Issue, Long> {
 
     // Listar tickets de un proyecto especifico agrupadas por su estado
-    List<Issue> findByProject_IdProjectAndStatus(Long idProject, String status);
+    List<Issue> findByProject_IdAndStatus(Long idProject, String status);
 
     // Ver todos los tickets de un proyecto
-    List<Issue> findByProject_IdProject(Long idProject);
+    List<Issue> findByProject_Id(Long idProject);
 
     // Para ver que los tickets que tiene asignado un usuario en especifico
-    List<Issue> findByAssignee_IdUserAndStatusNot(Long idUser, String status);
+    List<Issue> findByAssignee_IdAndStatusNot(Long idUser, String status);
 
     // Para buscar un ticket por su codigo
     Optional<Issue> findByTicketCode(String ticketCode);
