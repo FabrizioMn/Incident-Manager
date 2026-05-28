@@ -57,12 +57,14 @@ public class MemberProjectService {
 
     }
 
+    @Transactional(readOnly = true)
     public List<MemberProjectResponse> getMembersByProject(Long idProject) {
         return memberProjectRepository.findByProject_Id(idProject).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public void removeMemberFromProject(Long idProject, Long idUser) {
         MemberProjectId idCompound = new MemberProjectId(idProject, idUser);
         if (!memberProjectRepository.existsById(idCompound)) {
