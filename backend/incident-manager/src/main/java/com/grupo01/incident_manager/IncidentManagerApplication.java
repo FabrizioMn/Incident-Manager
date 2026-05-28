@@ -1,6 +1,5 @@
 package com.grupo01.incident_manager;
 
-import com.grupo01.incident_manager.repository.IssueRepository;
 import java.util.List;
 
 import org.springframework.boot.CommandLineRunner;
