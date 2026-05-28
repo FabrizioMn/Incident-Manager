@@ -54,6 +54,15 @@ public class MemberProjectService {
 
     }
 
+    public void removeMemberFromProject(Long idProject, Long idUser) {
+        MemberProjectId idCompound = new MemberProjectId(idProject, idUser);
+        if (!memberProjectRepository.existsById(idCompound)) {
+            throw new RuntimeException("El usuario no pertenece a este proyecto");
+        }
+
+        memberProjectRepository.deleteById(idCompound);
+    }
+
     private MemberProjectResponse mapToResponse(MemberProject member) {
         return new MemberProjectResponse(
                 member.getProject().getId(),
