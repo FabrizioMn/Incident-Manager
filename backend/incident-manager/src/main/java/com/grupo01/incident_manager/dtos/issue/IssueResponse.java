@@ -9,7 +9,7 @@ public record IssueResponse(
         String description,
         String type,
         String status,
-        String priorirt,
+        String priority,
         Long idProject,
         String projectKey,
         String creatorName,

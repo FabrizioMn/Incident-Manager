@@ -23,87 +23,106 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class IssueService {
 
-    private final IssueRepository issueRepository;
-    private final ProjectRepository projectRepository;
-    private final UserRepository userRepository;
-    private final MemberProjectRepository memberProjectRepository;
+        private final IssueRepository issueRepository;
+        private final ProjectRepository projectRepository;
+        private final UserRepository userRepository;
+        private final MemberProjectRepository memberProjectRepository;
+        private final HistoryService historyService;
 
-    @Transactional
-    public IssueResponse createIssue(IssueRequest request) {
-        // Buscamos el proyecto
-        Project project = projectRepository.findById(request.idProject())
-                .orElseThrow(() -> new RuntimeException("Proyecto no encontrado"));
+        @Transactional
+        public IssueResponse createIssue(IssueRequest request) {
+                // Buscamos el proyecto
+                Project project = projectRepository.findById(request.idProject())
+                                .orElseThrow(() -> new RuntimeException("Proyecto no encontrado"));
 
-        // Buscamos al usuario creador
-        User creator = userRepository.findById(request.idCreator())
-                .orElseThrow(() -> new RuntimeException("Usuario creador no encontrado"));
+                // Buscamos al usuario creador
+                User creator = userRepository.findById(request.idCreator())
+                                .orElseThrow(() -> new RuntimeException("Usuario creador no encontrado"));
 
-        // Verificamos si la incidencia esta asignada a un usuario o no
-        User assignee = null;
-        if (request.idAssignee() != null) {
-            // El asignado debe ser miembro activo del equipo del proyecto
-            boolean isMember = memberProjectRepository.existsByProject_IdAndUser_Id(project.getId(),
-                    request.idAssignee());
-            if (!isMember) {
-                throw new RuntimeException("No se puede asignar el ticket. El usuario no es miembro del proyecto.");
-            }
-            assignee = userRepository.findById(request.idAssignee()).orElse(null);
+                // Verificamos si la incidencia esta asignada a un usuario o no
+                User assignee = null;
+                if (request.idAssignee() != null) {
+                        // El asignado debe ser miembro activo del equipo del proyecto
+                        boolean isMember = memberProjectRepository.existsByProject_IdAndUser_Id(project.getId(),
+                                        request.idAssignee());
+                        if (!isMember) {
+                                throw new RuntimeException(
+                                                "No se puede asignar el ticket. El usuario no es miembro del proyecto.");
+                        }
+                        assignee = userRepository.findById(request.idAssignee()).orElse(null);
+                }
+
+                // Logica para crera el ticker code y contar las incidencias existentes del
+                // proyecto
+                long currentCount = issueRepository.countByProject_Id(project.getId());
+                String generatedCode = project.getKey() + "-" + (currentCount + 1);
+
+                // Construimos la entidad issue
+                Issue issue = Issue.builder()
+                                .ticketCode(generatedCode)
+                                .title(request.title())
+                                .description(request.description())
+                                .type(request.type().trim().toUpperCase())
+                                .priority(request.priority().trim().toUpperCase())
+                                .status("BACKLOG") // Estado por defecto
+                                .project(project)
+                                .creator(creator)
+                                .assignee(assignee)
+                                .updatedAt(LocalDateTime.now())
+                                .build();
+
+                Issue savedIssue = issueRepository.save(issue);
+                return mapToResponse(savedIssue);
+
         }
 
-        // Logica para crera el ticker code y contar las incidencias existentes del
-        // proyecto
-        long currentCount = issueRepository.countByProject_Id(project.getId());
-        String generatedCode = project.getKey() + "-" + (currentCount + 1);
+        @Transactional(readOnly = true)
+        public List<IssueResponse> getIssueByProject(Long idProject) {
+                return issueRepository.findByProject_Id(idProject).stream()
+                                .map(this::mapToResponse)
+                                .collect(Collectors.toList());
+        }
 
-        // Construimos la entidad issue
-        Issue issue = Issue.builder()
-                .ticketCode(generatedCode)
-                .title(request.title())
-                .description(request.description())
-                .type(request.type().trim().toUpperCase())
-                .priority(request.priority().trim().toUpperCase())
-                .status("BACKLOG") // Estado por defecto
-                .project(project)
-                .creator(creator)
-                .assignee(assignee)
-                .updatedAt(LocalDateTime.now())
-                .build();
+        @Transactional
+        public IssueResponse updateIssueStatus(Long idIssue, String newStatus) {
+                // Buscamos la tarea que se esta actualizando
+                Issue issue = issueRepository.findById(idIssue)
+                                .orElseThrow(() -> new RuntimeException("Incidencia no encontrada."));
 
-        Issue savedIssue = issueRepository.save(issue);
-        return mapToResponse(savedIssue);
+                // Obtenermos el email del usuario logueado
+                String currentEmail = org.springframework.security.core.context.SecurityContextHolder
+                                .getContext()
+                                .getAuthentication()
+                                .getName();
+                // Buscamos al usuario que esta haciendo el cambio
+                User userExecuting = userRepository.findByEmail(currentEmail)
+                                .orElseThrow(() -> new RuntimeException(
+                                                "Usuario no encontrado para registrar el cambio"));
+                String oldStatus = issue.getStatus();
+                String formattedNewStatus = newStatus.trim().toUpperCase();
 
-    }
+                // Actualizamos el estado del ticker
+                issue.setStatus(formattedNewStatus);
+                // Creamos el log
+                historyService.createLog(issue, userExecuting, "STATUS", oldStatus, formattedNewStatus);
 
-    @Transactional(readOnly = true)
-    public List<IssueResponse> getIssueByProject(Long idProject) {
-        return issueRepository.findByProject_Id(idProject).stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
-    }
+                return mapToResponse(issueRepository.save(issue));
+        }
 
-    @Transactional
-    public IssueResponse updateIssueStatus(Long idIssue, String newStatus) {
-        Issue issue = issueRepository.findById(idIssue)
-                .orElseThrow(() -> new RuntimeException("Incidencia no encontrada."));
-
-        issue.setStatus(newStatus.trim().toUpperCase());
-        return mapToResponse(issueRepository.save(issue));
-    }
-
-    private IssueResponse mapToResponse(Issue issue) {
-        return new IssueResponse(
-                issue.getId(),
-                issue.getTicketCode(),
-                issue.getTitle(),
-                issue.getDescription(),
-                issue.getType(),
-                issue.getStatus(),
-                issue.getPriority(),
-                issue.getProject().getId(),
-                issue.getProject().getKey(),
-                issue.getCreator().getName(),
-                issue.getAssignee() != null ? issue.getAssignee().getName() : "Unassigned",
-                issue.getCreatedAt(),
-                issue.getUpdatedAt());
-    }
+        private IssueResponse mapToResponse(Issue issue) {
+                return new IssueResponse(
+                                issue.getId(),
+                                issue.getTicketCode(),
+                                issue.getTitle(),
+                                issue.getDescription(),
+                                issue.getType(),
+                                issue.getStatus(),
+                                issue.getPriority(),
+                                issue.getProject().getId(),
+                                issue.getProject().getKey(),
+                                issue.getCreator().getName(),
+                                issue.getAssignee() != null ? issue.getAssignee().getName() : "Unassigned",
+                                issue.getCreatedAt(),
+                                issue.getUpdatedAt());
+        }
 }
