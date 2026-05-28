@@ -10,8 +10,8 @@ public record MemberProjectRequest(
     @NotNull(message = "El ID del usuario es obligatorio")
     Long idUser,
     
-    @NotNull(message = "El ID del rol del proyecto es obligatorio")
-    Long idRole
+    @NotNull(message = "El rol del proyecto es obligatorio")
+    String projectRole
 ) {
     
 }

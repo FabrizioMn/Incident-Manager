@@ -12,6 +12,7 @@ import jakarta.persistence.MapsId;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -20,18 +21,19 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "member_project")
+@Builder
 public class MemberProject {
 
     @EmbeddedId
     private MemberProjectId id = new MemberProjectId();
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("idUser")
+    @MapsId("idProject")
     @JoinColumn(name = "id_project")
     private Project project;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("idProject")
+    @MapsId("idUser")
     @JoinColumn(name = "id_user")
     private User user;
 
