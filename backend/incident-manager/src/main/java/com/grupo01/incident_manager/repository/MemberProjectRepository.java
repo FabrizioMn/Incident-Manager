@@ -12,9 +12,12 @@ import com.grupo01.incident_manager.model.MemberProjectId;
 public interface MemberProjectRepository extends JpaRepository<MemberProject, MemberProjectId> {
 
     // Para que un usuario pueda ver en que proyectos esta activo
-    List<MemberProject> findById_IdUser(Long idUser);
+    List<MemberProject> findByUser_Id(Long idUser);
 
     // Para ver el equipo de trabajo de un proyecto
-    List<MemberProject> findById_IdProject(Long idProject);
+    List<MemberProject> findByProject_Id(Long idProject);
+
+    // Para saber si un usuario ya existe en un proyecto
+    boolean existsByProject_IdAndUser_Id(Long idProject, Long idUser);
 
 }
