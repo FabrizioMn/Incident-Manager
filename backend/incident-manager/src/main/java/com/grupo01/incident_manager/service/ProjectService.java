@@ -63,6 +63,12 @@ public class ProjectService {
                 .collect(Collectors.toList());
     }
 
+    public ProjectResponse getProjectById(Long id) {
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Proyecto no encontrado"));
+        return mapToResponse(project);
+    }
+
     public void deleteProject(Long id) {
         // Verificamos si el proyecto existe
         if (!projectRepository.existsById(id)) {
