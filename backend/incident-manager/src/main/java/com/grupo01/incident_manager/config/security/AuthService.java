@@ -67,6 +67,8 @@ public class AuthService {
 
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        revokedAllUserTokens(user);
         String jwtToken = jwtService.generateToken(user);
         String jwtTokenRefresh = jwtService.generateRefreshToken(user);
         saveUserToken(user, jwtToken);
@@ -109,4 +111,15 @@ public class AuthService {
         userTokenRepository.save(token);
     }
 
+    private void revokedAllUserTokens(User user) {
+        var validUserTokens = userTokenRepository.findAllValidTokensByUser(user.getId());
+        if (validUserTokens.isEmpty())
+            return;
+
+        validUserTokens.forEach(token -> {
+            token.setExpired(true);
+            token.setRevoked(true);
+        });
+        userTokenRepository.saveAll(validUserTokens);
+    }
 }
