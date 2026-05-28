@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 public class MemberProject {
 
     @EmbeddedId
-    private MemberProjectId id = new MemberProjectId();
+    private MemberProjectId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("idProject")
@@ -46,6 +46,9 @@ public class MemberProject {
     @PrePersist
     protected void onCreate() {
         this.joinDate = LocalDateTime.now();
+        if (this.id == null) {
+            this.id = new MemberProjectId();
+        }
         if (project != null) {
             this.id.setIdProject(project.getId());
         }
