@@ -11,6 +11,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import com.grupo01.incident_manager.model.UserToken;
 import com.grupo01.incident_manager.repository.UserTokenRepository;
@@ -31,13 +32,16 @@ public class SecurityConfig {
     public SecurityFilterChain filterchain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(req -> req.requestMatchers("/auth/**")
-                        .permitAll()
+                .authorizeHttpRequests(req -> req
+                        .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
+                        .requestMatchers("/auth/**").permitAll()
                         .anyRequest()
                         .authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.sameOrigin()))
                 .logout(logout -> logout.logoutUrl("/auth/logout")
                         .addLogoutHandler((request, response, authentication) -> {
                             String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
