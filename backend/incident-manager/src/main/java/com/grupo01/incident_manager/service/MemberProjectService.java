@@ -1,5 +1,8 @@
 package com.grupo01.incident_manager.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,6 +55,12 @@ public class MemberProjectService {
         MemberProject savedMember = memberProjectRepository.save(memberProject);
         return mapToResponse(savedMember);
 
+    }
+
+    public List<MemberProjectResponse> getMembersByProject(Long idProject) {
+        return memberProjectRepository.findByProject_Id(idProject).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
     }
 
     public void removeMemberFromProject(Long idProject, Long idUser) {
