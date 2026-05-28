@@ -1,7 +1,6 @@
 package com.grupo01.incident_manager.service;
 
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
