@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.grupo01.incident_manager.model.Issue;
@@ -22,4 +24,7 @@ public interface IssueRepository extends JpaRepository<Issue, Long> {
 
     // Para buscar un ticket por su codigo
     Optional<Issue> findByTicketCode(String ticketCode);
+
+    @Query("SELECT COUNT(i) FROM Issue i WHERE i.project.id=:idProject")
+    long countByProject_Id(@Param("idProject") Long idProject);
 }
