@@ -63,6 +63,15 @@ public class ProjectService {
                 .collect(Collectors.toList());
     }
 
+    public void deleteProject(Long id) {
+        // Verificamos si el proyecto existe
+        if (!projectRepository.existsById(id)) {
+            throw new RuntimeException("El proyecto no existe");
+        }
+        // Eliminamos el proyecto de la base de datos
+        projectRepository.deleteById(id);
+    }
+
     private ProjectResponse mapToResponse(Project project) {
         return new ProjectResponse(
                 project.getId(),
